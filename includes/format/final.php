@@ -1,4 +1,4 @@
-<div id="un-stage-dialogue" class="dialogue-scene dialogue-quiz" <?php if ($bg_image) { ?>style="background-image: url('<?php echo $bg_image;?>')" <?php } ?> >
+<div id="un-stage-dialogue" class="dialogue-scene typing-effect dialogue-quiz" <?php if ($bg_image) { ?>style="background-image: url('<?php echo $bg_image;?>')" <?php } ?> >
 		<div class='un-stage-text'>
 			<?php if ($content!="") { ?><?php echo $content;?><?php } ?>
 <?php
