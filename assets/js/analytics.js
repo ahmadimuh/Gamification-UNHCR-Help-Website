@@ -1,62 +1,107 @@
-// Check if gtag is defined, which means GA4 is loaded
-if (typeof gtag === "undefined") {
-    console.error("Google Analytics (gtag) is not loaded. Please check GA setup.");
-} else {
-    console.log("Google Analytics (gtag) is connected.");
-}
+// ==============================
+// UN DataLayer Helper
+// ==============================
 
-// تابع ارسال رویداد به Google Analytics
-function sendGAEvent(eventName, params = {}) {
-    if (typeof gtag === "function") {
-        gtag('event', eventName, params);
-        console.log("Event sent:", eventName, params); // نمایش در کنسول برای دیباگ
-    } else {
-        console.warn("gtag not loaded!");
+(function (window) {
+
+    // اطمینان از وجود dataLayer
+    window.dataLayer = window.dataLayer || [];
+
+    // ------------------------------
+    // Private Helper
+    // ------------------------------
+    function push(data) {
+        window.dataLayer.push(data);
+        // برای دیباگ (اختیاری)
+        // console.log("DataLayer:", data);
     }
-}
 
+    // ------------------------------
+    // Public API
+    // ------------------------------
+    const UNDataLayer = {
 
-jQuery(document).ready(function($) {
-  
+        // ==========================
+        // Virtual Page View (Popup)
+        // ==========================
+        pageView: function ({
+            stageId,
+            category = "general",
+            title = "",
+            type = "Popup page",
+            language = "FA"
+        }) {
 
+            push({
+                event: "virtual_page_view",
+                load_type: "Modal page load",
+                module_type: "Modal / popup",
 
-// ثبت رویداد کلیک روی دکمه Start Flow
-$(document).on('click', '.un-flow-button', function() {
-    sendGAEvent('unhcr_help_ir_gamification_start_flow', {
-        category: $(this).data('category') || 'none'
-    });
-});
+                virtual_page_path: `/${category}/${stageId}/`,
+                virtual_page_location: window.location.origin + `/${category}/${stageId}/`,
+                virtual_page_title: title || `Stage ${stageId}`,
 
-// ثبت رویداد کلیک روی گزینه‌های سن
-$(document).on('click', '#question-age .un-quiz-option', function() {
-    sendGAEvent('unhcr_help_ir_gamification_age_option', {
-        option: $(this).data('value')
-    });
-});
+                content_language: language,
+                content_id: stageId,
+                content_group: category,
+                content_type: type,
+                content_name: title || `Stage ${stageId}`
+            });
+        },
 
-// ثبت رویداد کلیک روی گزینه جنسیت
-$(document).on('click', '#question-gender .un-quiz-option', function() {
-    sendGAEvent('unhcr_help_ir_gamification_gender_option', {
-        option: $(this).data('value')
-    });
-});
+        // ==========================
+        // Quiz Click
+        // ==========================
+        quizClick: function ({
+            stageId,
+            category,
+            question,
+            answer,
+            language = "FA"
+        }) {
 
-// ثبت رویداد کلیک روی next stage button
-$(document).on('click', '.un-stage-next-button', function() {
-    const next = $(this).data('next') || 'unknown';
-    sendGAEvent('unhcr_help_ir_gamification_next_stage', {
-        next_stage: next
-    });
-});
+            push({
+                event: "vitual_modal_questionaire_click",
 
-// ثبت رویداد کلیک روی Back to Categories
-$(document).on('click', '.un-back-to-categories-button', function() {
-    sendGAEvent('unhcr_help_ir_gamification_back_to_categories');
-});
+                content_language: language,
+                content_id: stageId,
+                content_group: category,
+                content_type: "Questionnaire",
 
-// ثبت رویداد وقتی ویدیو بسته می‌شود
-$(document).on('click', '.un-flow-popup-close', function() {
-    sendGAEvent('unhcr_help_ir_gamification_close_flow_popup');
-});
+                content_ask: question,
+                content_choice: answer
+            });
+        },
 
-});
+        // ==========================
+        // Video Play
+        // ==========================
+        videoPlay: function ({
+            stageId,
+            category,
+            language = "FA"
+        }) {
+
+            push({
+                event: "vitual_modal_video_play",
+
+                content_language: language,
+                content_id: stageId,
+                content_group: category,
+                content_type: "Video"
+            });
+        },
+
+        // ==========================
+        // Generic Event (برای آینده)
+        // ==========================
+        custom: function (data) {
+            push(data);
+        }
+
+    };
+
+    // Export به window
+    window.UNDataLayer = UNDataLayer;
+
+})(window);
