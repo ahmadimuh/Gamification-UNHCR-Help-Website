@@ -2,16 +2,15 @@ const UNFlowCache = {}; // کش دسته‌ها و HTML مربوطه
 
 jQuery(document).ready(function($) {
 	
-	
-	
-	
-	
 //برای پرسش سوالات سن و جنسیت
 
     // تابع برای راه‌اندازی سوالات گیمیفیکیشن
     function initializeQuiz() {
+        
         // وقتی محتوای stage به صورت داینامیک اضافه شد، این هندلرها کار می‌کنند
-        $(document).on('click', '#question-age .un-quiz-option', function(e){
+        $(document)
+    .off('click', '#question-age .un-quiz-option')
+    .on('click', '#question-age .un-quiz-option', function(e){
             e.preventDefault();
             var $ageOpt = $(this);
             var selectedAge = $ageOpt.data('value') || $ageOpt.attr('data-value');
@@ -29,7 +28,9 @@ jQuery(document).ready(function($) {
         });
 
         // بعد از انتخاب جنسیت
-        $(document).on('click', '#question-gender .un-quiz-option', function(e){
+        $(document)
+       .off('click', '#question-gender .un-quiz-option')
+       .on('click', '#question-gender .un-quiz-option', function(e){
             e.preventDefault();
             var $genderOpt = $(this);
             var selectedGender = $genderOpt.data('value') || $genderOpt.attr('data-value');
@@ -66,16 +67,16 @@ jQuery(document).ready(function($) {
 
             if (nextStage) {
                 // مشابه کدی که در پروژه شما برای بارگزاری next stage استفاده شده
-                $('.un-flow-popup-content').html('<p>' + (unFlowMessages ? unFlowMessages.next_stage_loading : 'Loading...') + '</p>');
+                $('.help-ir-gamification-popup-content').append('<p>' + (unFlowMessages ? unFlowMessages.next_stage_loading : 'Loading...') + '</p>');
                 $.post(UNFlow.ajax_url, {
                     action: 'get_un_stage_by_id',
                     nonce: UNFlow.nonce,
                     stage_id: nextStage
                 }, function(response){
                     if (response.success) {
-                        $('.un-flow-popup-content').html(response.data);
+                        $('.help-ir-gamification-popup-content').html(response.data);
                     } else {
-                        $('.un-flow-popup-content').html('<p>' + (unFlowMessages ? unFlowMessages.error_next_stage : 'Error loading next stage') + '</p>');
+                        $('.help-ir-gamification-popup-content').html('<p>' + (unFlowMessages ? unFlowMessages.error_next_stage : 'Error loading next stage') + '</p>');
                     }
                 });
                 return;
@@ -113,34 +114,169 @@ jQuery(document).ready(function($) {
 	
 	
     let currentCategory = '';
+    
+    
+// ============================
+// Audio Manager
+// ============================
 
+let currentStageAudio = null;
+let audioEnabled = localStorage.getItem('un_audio_enabled') !== 'false';
+let currentAudioUrl = null;
+$('.un-stage-audio-button').hide();
+if (audioEnabled) {
+    $('.un-stage-audio-button').removeClass('muted');
+} else {
+    $('.un-stage-audio-button').addClass('muted');
+}
+
+
+function stopStageAudio() {
+
+    if (currentStageAudio) {
+
+        currentStageAudio.pause();
+        currentStageAudio.currentTime = 0;
+        currentStageAudio = null;
+    }
+}
+
+function playStageAudio(audioUrl) {
+
+    stopStageAudio();
+
+    if (!audioEnabled) {
+        return;
+    }
+
+    if (!audioUrl) {
+        return;
+    }
+
+    currentStageAudio = new Audio(audioUrl);
+
+    currentStageAudio.play().catch(function(error) {
+        console.log('Audio autoplay blocked:', error);
+    });
+}
+    
+$(document).on('click', '.un-stage-audio-button', function() {
+
+    audioEnabled = !audioEnabled;
+
+    localStorage.setItem(
+        'un_audio_enabled',
+        audioEnabled
+    );
+
+    if (!audioEnabled) {
+
+        stopStageAudio();
+
+        $(this).addClass('muted');
+
+    } else {
+
+        $(this).removeClass('muted');
+
+        // پخش صدای همین مرحله
+        if (currentAudioUrl) {
+            playStageAudio(currentAudioUrl);
+        }
+    }
+
+});
+function updateAudioButton(audioUrl) {
+
+    if (!audioUrl) {
+        $('.un-stage-audio-button').hide();
+        return;
+    }
+
+    $('.un-stage-audio-button').show();
+
+    if (audioEnabled) {
+        $('.un-stage-audio-button').removeClass('muted');
+    } else {
+        $('.un-stage-audio-button').addClass('muted');
+    }
+}
+function hideAudioButton() {
+
+    stopStageAudio();
+
+    currentAudioUrl = null;
+
+    $('.un-stage-audio-button').hide();
+}
     // ============================
     // Load Stage by ID
     // ============================
     function loadStage(stageId, status) {
         // لودینگ روی محتوا
-        $('.un-flow-popup-content').addClass('loading');
-        $('.un-flow-popup-content').append('<div class="un-flow-overlay"><div class="spinner"></div></div>');
+        $('.help-ir-gamification-loading').css('display', 'flex');
 
-        $.post(UNFlow.ajax_url, {
-            action: 'get_un_stage_by_id',
-            nonce: UNFlow.nonce,
-            stage_id: stageId,
-            status: status
-        }, function(response) {
-            $('.un-flow-popup-content').removeClass('loading');
-            $('.un-flow-overlay').remove();
+    $('.help-ir-gamification-popup-content').addClass('loading');
+
+    $('.un-stage-back-button').prop('disabled', true);
+    $('.un-stage-next-button').prop('disabled', true);
+    $('.un-stage-restart-button').prop('disabled', true);
+
+    $.post(UNFlow.ajax_url, {
+        action: 'get_un_stage_by_id',
+        nonce: UNFlow.nonce,
+        stage_id: stageId,
+        status: status
+    }, function(response) {
+
+            $('.help-ir-gamification-loading').hide();
+            $('.help-ir-gamification-popup-content').removeClass('loading');
+            $('.help-ir-gamification-overlay').remove();
 
             if (response.success) {
                 // اگر پاسخ شامل html و next_stage باشد
                 const html = response.data.html ? response.data.html : response.data;
                 const nextStage = response.data.next_stage ? response.data.next_stage : null;
+                
+                const prevStage = response.data.prev_stage ? response.data.prev_stage : null;
+                
+                const typeStage = response.data.type_stage ? response.data.type_stage : null;
+                
+                const nameStage = response.data.name_stage ? response.data.name_stage : null;
+                
+                const catStage = response.data.cat_stage ? response.data.cat_stage : null;
+                
+                const audioUrl = response.data.audio_url ? response.data.audio_url : null;
+                
+               $('.help-ir-gamification-popup-content').html(html);
 
-                $('.un-flow-popup-content').html(html);
+                currentAudioUrl = audioUrl;
+
+                updateAudioButton(audioUrl);
+
+                playStageAudio(audioUrl);
+                
+              
+                
+                UNDataLayer.pageView({
+                         stageId: stageId,
+                         category: catStage,
+                         title: nameStage,
+                         type: typeStage
+                });
 
                 // دکمه next stage را آپدیت کن
                 if (nextStage) {
-                    $('.un-stage-next-button').data('next', nextStage).show();
+                    $('.un-stage-next-button').data('next', nextStage);
+                }
+                if (prevStage) {
+                    $('.un-stage-back-button').data('back', prevStage);
+                    $('.un-stage-back-button').show();
+                } else {
+                    $('.un-stage-back-button').hide();
+                }
+                if (nextStage && (typeStage=="text" || typeStage=="video")) {
+                    $('.un-stage-next-button').show();
                 } else {
                     $('.un-stage-next-button').hide();
                 }
@@ -148,14 +284,24 @@ jQuery(document).ready(function($) {
 				//********gamecall
 				const gameContainer = document.querySelector('.game-container');
                   if (gameContainer) {
-                       startGame();
+                      
+					  
 				  }
 				//********surveycall
 				initializeQuiz();
+				
+				
+				
+				
+                $('.un-stage-back-button').prop('disabled', false);
+                $('.un-stage-next-button').prop('disabled', false);
+                $('.un-stage-restart-button').prop('disabled', false);
+        
 
             } else {
-                $('.un-flow-popup-content').html('<p>' + unFlowMessages.error_loading_stage + '</p>');
+                $('.help-ir-gamification-popup-content').html('<p>' + unFlowMessages.error_loading_stage + '</p>');
                 $('.un-stage-next-button').hide();
+                $('.un-stage-back-button').hide();
             }
         });
     }
@@ -164,52 +310,55 @@ jQuery(document).ready(function($) {
     // Fetch Flows by Category
     // ============================
     function fetchFlowsByCategory(category) {
-        if (!category) return fetchCategories();
 
-        if (UNFlowCache[category]) {
-            $('.un-flow-popup-content').html(UNFlowCache[category]);
-            return;
+    hideAudioButton();
+
+    if (!category) return fetchCategories();
+
+    $('.help-ir-gamification-loading').css('display', 'flex');
+
+    $.post(UNFlow.ajax_url, {
+        action: 'get_un_flows_by_category',
+        nonce: UNFlow.nonce,
+        category: category
+    }, function(response) {
+
+        $('.help-ir-gamification-loading').hide();
+
+        if (response.success) {
+            UNFlowCache[category] = response.data;
+            $('.help-ir-gamification-popup-content').html(response.data);
+        } else {
+            $('.help-ir-gamification-popup-content')
+                .html('<p>' + unFlowMessages.error_loading_flows + '</p>');
         }
-
-        $('.un-flow-popup-content').html('<div class="un-flow-loading"><div class="spinner"></div></div>');
-
-        $.post(UNFlow.ajax_url, {
-            action: 'get_un_flows_by_category',
-            nonce: UNFlow.nonce,
-            category: category
-        }, function(response) {
-            if (response.success) {
-                UNFlowCache[category] = response.data;
-                $('.un-flow-popup-content').html(response.data);
-            } else {
-                $('.un-flow-popup-content').html('<p>' + unFlowMessages.error_loading_flows + '</p>');
-            }
-        });
-    }
+    });
+}
 
     // ============================
     // Fetch All Categories
     // ============================
     function fetchCategories() {
         const cacheKey = 'all_categories';
-
+        hideAudioButton();
         if (UNFlowCache[cacheKey]) {
-            $('.un-flow-popup-content').html(UNFlowCache[cacheKey]);
+            $('.help-ir-gamification-popup-content').html(UNFlowCache[cacheKey]);
             return;
         }
 
-        $('.un-flow-popup-content').html('<div class="un-flow-loading"><div class="spinner"></div></div>');
+        $('.help-ir-gamification-loading').css('display', 'flex');
 
         $.post(UNFlow.ajax_url, {
             action: 'get_un_flows_by_category',
             nonce: UNFlow.nonce,
             category: ''
         }, function(response) {
+              $('.help-ir-gamification-loading').hide();
             if (response.success) {
                 UNFlowCache[cacheKey] = response.data;
-                $('.un-flow-popup-content').html(response.data);
+                $('.help-ir-gamification-popup-content').html(response.data);
             } else {
-                $('.un-flow-popup-content').html('<p>' + unFlowMessages.error_loading_flows + '</p>');
+                $('.help-ir-gamification-popup-content').html('<p>' + unFlowMessages.error_loading_flows + '</p>');
             }
         });
     }
@@ -251,13 +400,13 @@ function setSurveyCookie() {
     // ============================
     // Open Popup (category or all)
     // ============================
-    $(document).on('click', '.un-flow-button', function() {
+    $(document).on('click', '.help-ir-gamification-button', function() {
 		
 	
 	// Check if new load page
-    if ($('.un-flow-popup-content').is(':empty')) {
+    if ($('.help-ir-gamification-popup-content').is(':empty')) {
 		
-		$('.un-flow-popup-content').html('<div class="un-flow-loading"><div class="spinner"></div></div>');
+	  $('.help-ir-gamification-loading').css('display', 'flex');
 		
 		// Set Cookie for First user
   		  let exists = getCookie('unhcr_help_ir_gamification_user');
@@ -265,8 +414,8 @@ function setSurveyCookie() {
              setStartCookie();
           }
 	
-        $('.un-flow-popup-overflow').fadeIn();
-        $('#un-flow-popup').fadeIn();
+        $('.help-ir-gamification-popup-overflow').fadeIn();
+        $('#help-ir-gamification-popup').fadeIn();
 		
         const category = $(this).data('category') || '';
         currentCategory = category;
@@ -289,8 +438,8 @@ function setSurveyCookie() {
 	}else{
 	
         
-        $('.un-flow-popup-overflow').fadeIn();
-		$('#un-flow-popup').fadeIn();
+        $('.help-ir-gamification-popup-overflow').fadeIn();
+		$('#help-ir-gamification-popup').fadeIn();
 	
 	}	
 		
@@ -299,7 +448,7 @@ function setSurveyCookie() {
     // ============================
     // Click on Category Item
     // ============================
-    $(document).on('click', '.un-flow-category-item', function() {
+    $(document).on('click', '.help-ir-gamification-category-item', function() {
         const categorySlug = $(this).data('slug');
         if (!categorySlug) return;
         currentCategory = categorySlug;
@@ -315,7 +464,7 @@ function setSurveyCookie() {
         window.currentFlow = { firstStageId: stageId };
 		// set step cookie
    		setStepCookie(stageId);
-        $('.un-flow-popup-content').html('<div class="un-flow-loading"><div class="spinner"></div></div>');
+        $('.help-ir-gamification-loading').css('display', 'flex');
         loadStage(stageId, 'first');
     });
 
@@ -327,8 +476,30 @@ function setSurveyCookie() {
         if (!next) return;
 		// set step cookie
    		setStepCookie(next);
-        $('.un-flow-popup-content').html('<div class="un-flow-loading"><div class="spinner"></div></div>');
+        $('.help-ir-gamification-loading').css('display', 'flex');
+        stopStageAudio();
         loadStage(next);
+    });
+    
+    // ============================
+    // show next btn 
+    // ============================	
+	
+    function showNextBTN() { 
+       $('.un-stage-next-button').show();
+    }
+    
+    // ============================
+    // BACK Stage Button
+    // ============================
+    $(document).on('click', '.un-stage-back-button', function() {
+        const back = $(this).data('back');
+        if (!back) return;
+		// set step cookie
+   		setStepCookie(back);
+        $('.help-ir-gamification-loading').css('display', 'flex');
+        stopStageAudio();
+        loadStage(back);
     });
 
     // ============================
@@ -337,6 +508,20 @@ function setSurveyCookie() {
     $(document).on('click', '.un-quiz-option', function() {
         const status = $(this).data('status');
         const container = $(this).closest('.un-stage');
+        
+        const questionText = $('.un-quiz-question:visible').text();
+        const questionAnswer = $(this).text();
+        const stageId = container.data('stage-id');
+        const category = container.data('category');
+        
+        UNDataLayer.quizClick({
+        stageId: stageId,
+        category: category,
+        question: questionText,
+        answer: questionAnswer
+        });
+        
+		$(this).find('.un-quiz-result').fadeIn();
         const nextMap = {
             correct: container.data('correct'),
             wrong: container.data('wrong'),
@@ -352,8 +537,16 @@ function setSurveyCookie() {
         }
 
         $(this).addClass('correct');
-		
-        setTimeout(() => loadStage(nextStage), 1200);
+
+        clearAllTimers(); 
+
+        $('.un-stage-next-button').show();
+
+        nextStageTimeout = setTimeout(() => {
+         stopStageAudio();
+         loadStage(nextStage);
+        }, 10000);
+        
     });
 
     // ============================
@@ -361,6 +554,7 @@ function setSurveyCookie() {
     // ============================
     $(document).on('click', '.un-stage-restart-button', function() {
         if (window.currentFlow && window.currentFlow.firstStageId) {
+            stopStageAudio();
             loadStage(window.currentFlow.firstStageId);
         } else {
             console.warn(unFlowMessages.restart_warning);
@@ -371,7 +565,8 @@ function setSurveyCookie() {
     // Close Stage
     // ============================
     $(document).on('click', '.un-stage-close-button', function() {
-        $('.un-stage-close-button, .un-stage-restart-button').fadeOut();
+        hideAudioButton();
+        $('.un-stage-close-button, .un-stage-restart-button, .un-stage-back-button, .un-stage-next-button').fadeOut();
         if (currentCategory) {
             fetchFlowsByCategory(currentCategory);
         } else {
@@ -383,7 +578,9 @@ function setSurveyCookie() {
     // ============================
     // Close Popup
     // ============================
-    $(document).on('click', '.un-flow-popup-close', function() {
+    $(document).on('click', '.help-ir-gamification-popup-close', function() {
+        
+    hideAudioButton();
 		
 	// find & stop video
     const video = $('.un-stage-type-video video')[0];
@@ -391,27 +588,68 @@ function setSurveyCookie() {
         video.pause(); // pause video
     }
 		
-        $('#un-flow-popup').fadeOut();
-        $('.un-flow-popup-overflow').fadeOut();
+        $('#help-ir-gamification-popup').fadeOut();
+        $('.help-ir-gamification-popup-overflow').fadeOut();
     });
 
     // ============================
     // Back to Categories
     // ============================
     $(document).on('click', '.un-back-to-categories-button', function() {
-        $('.un-stage-close-button, .un-stage-restart-button').fadeOut();
+        hideAudioButton();
+        $('.un-stage-close-button, .un-stage-restart-button, .un-stage-back-button, .un-stage-next-button').fadeOut();
         currentCategory = '';
         fetchCategories();
 		deleteStepCookie();
     });
+
+
+//show next level blink after 30 Second
+//click next-level-alert
+
+
+
+     let alertTimeout, highlightTimeout, nextStageTimeout;
+    
+    function clearAllTimers() {
+    clearTimeout(alertTimeout);
+    clearTimeout(highlightTimeout);
+    clearTimeout(nextStageTimeout);
+    }
+    
+    
+   function showNextButtonWithDelay() {
+
+    clearAllTimers(); 
+
+    $('.next-level-alert').hide();
+    $('.un-stage-next-button').removeClass('un-stage-next-button-alert');
+
+    alertTimeout = setTimeout(function() {
+        $('.next-level-alert').fadeIn().off('click').on('click', function() {
+            var nextButton = $('.un-stage-next-button');
+            if (nextButton.length) {
+                nextButton.click();  
+            }
+        });
+    }, 30000);  
+
+    highlightTimeout = setTimeout(function() {
+        var nextButton = $('.un-stage-next-button');
+        if (nextButton.length) {
+            nextButton.addClass('un-stage-next-button-alert');  
+        }
+    }, 15000);  
+}
+
+    // اجرای اولیه
+    showNextButtonWithDelay();
+
+    // بعد از AJAX Loading
+    $(document).ajaxComplete(function() {
+        showNextButtonWithDelay();
+    });
+
 });
-
-
-
-
-
-
-
-
 
 
