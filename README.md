@@ -40,6 +40,11 @@ To collect statistical data, you can use [Google Analytics](https://analytics.go
 - Added Google Analytics data collection support.
 - Improved UI and user experience.
 
+### Version 1.2.0
+- Added Google Analytics DataLayer.
+- Improved UI and user experience.
+- Added Audio streaming service.
+
 ## Contributing to the Project
 
 If you'd like to contribute to this project, please fork the repository and submit pull requests with your changes.
