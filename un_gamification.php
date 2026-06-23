@@ -43,8 +43,8 @@ add_action('init', function() {
 require_once plugin_dir_path(__FILE__) . 'includes/userStageStructure.php'; // ساختار جریان ها و مراحل
 //require_once plugin_dir_path(__FILE__) . 'includes/flowLock.php'; // قفل جریان ها
 //require_once plugin_dir_path(__FILE__) . 'includes/display.php'; // نمایش لیست جریان ها و مراحل
-//require_once plugin_dir_path(__FILE__) . 'includes/userStageFields.php'; // فیلدهای مراحل
-//require_once plugin_dir_path(__FILE__) . 'includes/userStageTypeFields.php'; // فیلدهای مراحل بر اساس نوع
+require_once plugin_dir_path(__FILE__) . 'includes/userStageFields.php'; // فیلدهای مراحل
+require_once plugin_dir_path(__FILE__) . 'includes/userStageTypeFields.php'; // فیلدهای مراحل بر اساس نوع
 //require_once plugin_dir_path(__FILE__) . 'includes/userStageView.php'; // ساخت شورت‌کد برای نمایش مراحل در فرانت
 require_once plugin_dir_path(__FILE__) . 'includes/btnPopup.php'; // شورت‌کد برای دکمه بازکننده پاپ‌آپ جریان
 require_once plugin_dir_path(__FILE__) . 'includes/ajaxHandlers.php'; // لود کننده محتوا در پاپ آپ
