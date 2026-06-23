@@ -20,7 +20,12 @@ echo "<ul class='un-quiz-options'>";
 foreach ($options as $opt) {
     $text = $opt['text'] ?? __('Option without text', 'un-gamification');
     $status = $opt['type'] ?? 'neutral'; // Assuming "type" field has value: correct / wrong / neutral
-    echo "<li class='un-quiz-option' data-status='" . esc_attr($status) . "'>🔵 " . esc_html($text) . "</li>";
+	$result = $opt['result'];
+    echo "<li class='un-quiz-option' data-status='" . esc_attr($status) . "'>" . esc_html($text);
+	if($result){
+	echo "<span class='un-quiz-result'> (" . esc_html($result) . ") </span>";	
+	}
+	echo "</li>";
 }
 
 echo "</ul>";
