@@ -1,46 +1,5 @@
-.dialogue-scene {
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 20px;
-  font-family: 'IRANSans', sans-serif;
-  border-radius: 5px;
-  overflow: hidden;
-}
-.dialogue-quiz{
-  display: block;	
-}
-.un-quiz-question{
-    background: rgb(255 255 255 / 90%);
-    margin-top: 10px;
-    padding: 10px 15px;
-    border-radius: 15px;
-	font-size: 17px;
-}
-.un-quiz-options {
-    background: rgb(255 255 255 / 90%);
-    margin-top: 10px;
-    padding: 10px 15px;
-    border-radius: 15px;
-}
-.un-quiz-options li {
-    padding: 15px;
-    background-color: #e5e5e5b0;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    border-bottom: dashed 1px #4779a0;
-	font-size: 17px;
-	list-style-type: none;
-	cursor: pointer;
-	transition: all .4s ease;
--webkit-transition: all .4s ease;
-}
-.un-quiz-options li:hover {
-    background-color: #94b3c0b0;
-}
+
+
 
 
 
@@ -48,14 +7,13 @@
 .character {
     width: 50%;
     text-align: left;
-    position: relative;
     margin: 0px;
     padding: 0px;
     margin-bottom: -30vh;
 }
 
 .character img {
-   max-height: 420px;
+   height: auto;
 }
 .char-left{
 	text-align: left;
@@ -72,7 +30,7 @@
     border-radius: 15px;
     opacity: 1;
     position: absolute;
-    top: -15vh;
+    top: 0px;
 }
 html:lang(fa-IR) .speech {
     text-align: right;
@@ -102,11 +60,9 @@ html:lang(fa-IR) .speech {
 
 @media only screen and (max-width: 994px) {
 .character img {
-    max-height: 350px;
+    height: auto;
 }
-.character {
-    margin-bottom: -25vh;
-}
+
 
 }
 
