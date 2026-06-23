@@ -36,6 +36,9 @@ function get_un_flows_by_category_callback() {
         $categories = get_terms([
             'taxonomy'   => 'un_flow_category',
             'hide_empty' => false,
+            'meta_key'   => 'un_category_priority', // فیلد اولویت
+            'orderby'    => 'meta_value_num',       // مرتب‌سازی عددی
+            'order'      => 'ASC'                   // از عدد کم به زیاد
         ]);
 
         if (empty($categories) || is_wp_error($categories)) {
@@ -43,15 +46,14 @@ function get_un_flows_by_category_callback() {
         }
 
         ob_start();
-        echo "<div class='un-flow-categories'>";
+        echo "<div class='help-ir-gamification-categories'>";
 
 
 foreach ($categories as $cat) {
     $thumbnail = get_term_meta($cat->term_id, 'un_category_image_url', true) ?: 'https://via.placeholder.com/300x200?text=' . urlencode(__('No image', 'un-gamification'));
-    echo "<div class='un-flow-category-item' data-slug='" . esc_attr($cat->slug) . "'>
-        <img class='un-flow-category-thumb' src='" . esc_url($thumbnail) . "' alt='" . esc_attr($cat->name) . "' />
+    echo "<div class='help-ir-gamification-category-item' data-slug='" . esc_attr($cat->slug) . "'>
+        <img class='help-ir-gamification-category-thumb' src='" . esc_url($thumbnail) . "' alt='" . esc_attr($cat->name) . "' />
         <h4>" . esc_html($cat->name) . "</h4>
-        <p>" . esc_html($cat->description) . "</p>
     </div>";
 }		
 
@@ -73,6 +75,8 @@ foreach ($categories as $cat) {
                 'terms'    => $category,
             ]
         ],
+        'orderby'        => 'date',  // مرتب‌سازی بر اساس تاریخ انتشار
+        'order'          => 'DESC',  // جدیدترین پست‌ها اول
     ];
 
     $flows = get_posts($args);
@@ -82,7 +86,7 @@ foreach ($categories as $cat) {
     }
 
     ob_start();
-
+    echo "<div class='help-ir-gamification-list' >";
     foreach ($flows as $flow) {
         $id = $flow->ID;
         $thumbnail = get_the_post_thumbnail_url($id, 'large') ?: 'https://via.placeholder.com/300x200?text=' . urlencode(__('No image', 'un-gamification'));
@@ -91,16 +95,17 @@ foreach ($categories as $cat) {
         $desc      = get_post_meta($id, '_un_flow_description', true) ?: __('No description', 'un-gamification');
         $first_stage = get_post_meta($id, '_un_flow_first_stage_id', true) ?: 0;
 
-        echo "<div class='un-flow-item'>
-            <img class='un-flow-thumbnail' src='" . esc_url($thumbnail) . "' alt='" . esc_attr($title) . "' />
-            <div class='un-flow-info'>
+        echo "<div class='help-ir-gamification-item start-flow-button' data-stage='" . esc_attr($first_stage) . "'>
+            <img class='help-ir-gamification-thumbnail' src='" . esc_url($thumbnail) . "' alt='" . esc_attr($title) . "' />
+            <div class='help-ir-gamification-info'>
+			<div class='title'>
                 <h4>" . esc_html($title) . "</h4>
                 <p>" . esc_html($desc) . "</p>
-                <button class='start-flow-button' data-stage='" . esc_attr($first_stage) . "'>" . __('Start', 'un-gamification') . "</button>
+            </div>
             </div>
         </div>";
     }
-
+    echo "</div>";
     $output = ob_get_clean();
     wp_send_json_success($output);
 }
@@ -154,10 +159,17 @@ function get_un_stage_by_id_callback() {
     $char2_text2  = get_post_meta($stage_id, '_un_stage_char2_text2', true);
 	$video_link  = get_post_meta($stage_id, '_un_stage_video_url', true);
 	$video_type  = get_post_meta($stage_id, '_un_stage_video_type', true);
-	$game_code  = get_post_meta($stage_id, '_un_stage_game_embed', true);
+	$audio_link  = get_post_meta($stage_id, '_un_stage_audio_url', true);
+	
+	$stage_post = get_post($stage_id);
+    $post_title = $stage_post ? $stage_post->post_title : '';
+    $flow_id = get_post_meta($stage_id, '_un_stage_flow_id', true);
+    $flow_name = $flow_id ? get_the_title($flow_id) : '';
 
     if ($type === 'quiz') {
         echo "<div class='un-stage un-stage-type-quiz' 
+            data-stage-id='" . esc_attr($stage_id) . "'
+            data-category='" . esc_attr($flow_name) . "'
             data-correct='" . esc_attr($correct_id) . "'
             data-wrong='" . esc_attr($wrong_id) . "'
             data-neutral='" . esc_attr($neutral_id) . "'>";
@@ -166,6 +178,8 @@ function get_un_stage_by_id_callback() {
     }
 
     echo "<!-- " . sprintf(__('Stage #%d', 'un-gamification'), $stage_id) . " -->";
+
+
 
 	if ($type === 'text') {
     require_once plugin_dir_path(__FILE__) . 'format/text.php';//text and dialog format
@@ -188,36 +202,8 @@ function get_un_stage_by_id_callback() {
         echo "<p>" . __('Video format not supported.', 'un-gamification') . "</p>";
     }
 } elseif ($type === 'game') {
-/*		
-    if (strpos($content, '<iframe') !== false) {
-        echo $content; // Raw HTML
-    } elseif (preg_match('/\.html$/', $content)) {
-        echo "<iframe src='" . esc_url($content) . "' width='100%' height='400'></iframe>";
-    } else {
-        echo "<p>" . __('Game not available for display.', 'un-gamification') . "</p>";
-    }
-*/
-//		echo $game_code;
 
-
-?>
-
-<div class="game-container">
-    <div class="game-cell">🔵</div>
-    <div class="game-cell">🟢</div>
-    <div class="game-cell">🟢</div>
-    <div class="game-cell">🔵</div>
-    <div class="game-cell">🟠</div>
-    <div class="game-cell">🟠</div>
-</div>
-<div class="game-message"><?php echo __('تصاویر با موضوع مشابه را انتخاب کنید', 'un-gamification'); ?></div>
-
-
-
-
-<?php
-	
-		
+require_once plugin_dir_path(__FILE__) . 'format/game.php';//game format
 		
 } elseif ($type === 'end') {
 require_once plugin_dir_path(__FILE__) . 'format/final.php';//final format		
@@ -245,8 +231,59 @@ $html = ob_get_clean();
 // گرفتن آیدی مرحله بعد (در صورتی که وجود داشته باشد)
 $next_stage_id = !empty($correct_id) ? intval($correct_id) : 0;
 
+
+
+
+//آیدی مرحله قبل
+$prev_stage_id = 0;
+
+$args = [
+    'post_type' => 'un_stage',
+    'posts_per_page' => 1,
+    'meta_query' => [
+        'relation' => 'OR',
+        [
+            'key' => '_un_stage_correct_stage_id',
+            'value' => $stage_id,
+            'compare' => '=',
+            'type' => 'NUMERIC'
+        ],
+        [
+            'key' => '_un_stage_wrong_stage_id',
+            'value' => $stage_id,
+            'compare' => '=',
+            'type' => 'NUMERIC'
+        ],
+        [
+            'key' => '_un_stage_neutral_stage_id',
+            'value' => $stage_id,
+            'compare' => '=',
+            'type' => 'NUMERIC'
+        ]
+    ]
+];
+
+$query = new WP_Query($args);
+
+if ($query->have_posts()) {
+    $query->the_post();
+    $prev_stage_id = get_the_ID();
+    wp_reset_postdata();
+}
+
+
+
 wp_send_json_success([
     'html' => $html,
-    'next_stage' => $next_stage_id
+    'next_stage' => $next_stage_id,
+    'prev_stage' => $prev_stage_id,
+    'type_stage' => $type,
+    'name_stage' => $post_title,
+    'cat_stage' => $flow_name,
+    'audio_url'  => $audio_link
 ]);
 }
+
+
+
+
