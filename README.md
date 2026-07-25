@@ -45,6 +45,9 @@ To collect statistical data, you can use [Google Analytics](https://analytics.go
 - Improved UI and user experience.
 - Added Audio streaming service.
 
+### Version 1.3.0
+- Skip game after 8 seconds
+
 ## Contributing to the Project
 
 If you'd like to contribute to this project, please fork the repository and submit pull requests with your changes.
