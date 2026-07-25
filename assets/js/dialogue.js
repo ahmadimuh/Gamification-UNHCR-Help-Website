@@ -2,14 +2,14 @@ document.addEventListener('DOMContentLoaded', function () {
   const leftLines = document.querySelectorAll('.speech-left .line');
   const rightLines = document.querySelectorAll('.speech-right .line');
 
-  // اگر هیچ دیالوگی وجود ندارد، کد را اجرا نکن
+ // If there is no dialog, don't run the code
   if (!leftLines.length && !rightLines.length) return;
 
-  // ابتدا همه دیالوگ‌ها را مخفی نگه داریم
-  gsap.set([leftLines, rightLines], {opacity: 0, y: 20});
+// First, keep all dialogs hidden
+gsap.set([leftLines, rightLines], {opacity: 0, y: 20});
 
-  // مرحله گفتگو را اجرا کن
-  const tl = gsap.timeline();
+// Execute the conversation step
+const tl = gsap.timeline();
 
   tl.to('.speech-left', {opacity: 1, duration: 0.3})
     .to(leftLines, {
@@ -36,23 +36,38 @@ function nextstagegame() {
             }
 }
 
+// Auto show next stage button after 8 seconds
+window.startGameSkipTimer = function () {
 
+    clearTimeout(window.unStageSkipTimer);
+
+    window.unStageSkipTimer = setTimeout(function () {
+
+        if (typeof window.showNextStageButton === 'function') {
+
+            window.showNextStageButton();
+
+        } else {
+
+            jQuery('.un-stage-next-button').show();
+
+        }
+
+    }, 8000);
+
+};
 
 //game_type_1
-function helpIrGamificationGameOneShowDescription(id) {
-      if (document.getElementById(id).classList.contains('active')) {
-          document.getElementById(id).classList.remove('active');
-        } else {
-          document.getElementById(id).classList.add('active');
-        }   
-}
-function helpIrGamificationGameOneShowDescription(id) {
+function helpIrGamificationGameOneShowDescription(event, id) {
 
-    var desc = document.getElementById(id);
+    const desc = document.getElementById(id);
+
+    if (!desc) return;
+
     desc.classList.toggle('active');
 
-    
-    var clickedOption = event.currentTarget;
+    const clickedOption = event.currentTarget;
+
     clickedOption.classList.add('completed');
 
     helpIrGamificationGameOnecheckAllOptionsCompleted();
@@ -256,7 +271,9 @@ const GameThree = (() => {
       originalTiles = [...jsonData.tiles];
       messages = jsonData.messages;
 
-      shuffleBtn.addEventListener('click', shuffleTiles);
+      if (shuffleBtn) {
+		shuffleBtn.addEventListener("click", shuffleTiles);
+		}
 
       shuffleTiles(); 
     }
@@ -378,7 +395,7 @@ const GameThree = (() => {
 //game_type_5
 
 
-  class GamificationMapGameFive {
+  class HelpIrGamificationMapGameFive {
     constructor({ containerSelector, mapPoints, initialText }) {
       this.containerSelector = containerSelector;
       this.mapPoints = mapPoints;
