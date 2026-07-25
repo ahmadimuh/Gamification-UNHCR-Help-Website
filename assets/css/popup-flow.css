@@ -1,4 +1,5 @@
 
+
 .help-ir-gamification-popup-overflow {
     position: fixed;
     height: 100vh;
@@ -7,6 +8,7 @@
     bottom: 0;
     background: rgb(0 0 0 / 65%);
 	transition: all 0.3s ease;
+	z-index: 999;
 }
 
 .help-ir-gamification-popup, .help-ir-gamification-popup button, .help-ir-gamification-popup p, .help-ir-gamification-popup div {
@@ -18,6 +20,7 @@
 /*footer*/
 .help-ir-gamification-popup-footer{
 	height: 35px;
+	padding: 0px 10px;
 }
 .help-ir-gamification-popup-footer .un-stage-back-button{
 	position: absolute;
@@ -553,6 +556,19 @@
     overflow-y: visible;
     transition: all 0.3s ease;
 }
+
+.help-ir-gamification-embed .help-ir-gamification-popup {
+    position: relative;
+    display: block;
+    margin-left: 10%;
+    margin-right: 10%;
+    width: 80%;
+    top: 0px;
+    margin-bottom: 20px;
+}
+
+
+
 html .help-ir-gamification-popup {
     border-radius: 15px;
 }
@@ -627,23 +643,37 @@ html .corner-inverse {
 }
 
 .help-ir-gamification-button:before {
-  background-color: initial;
-  background-image: linear-gradient(#fff 0, rgba(255, 255, 255, 0) 100%);
-  border-radius: 125px;
-  content: "";
-  height: 50%;
-  left: 4%;
-  opacity: .5;
-  position: absolute;
-  top: 0;
-  transition: all .3s;
-  width: 92%;
+    background-color: initial;
+    background-image: linear-gradient(#fff 0, rgba(255, 255, 255, 0) 100%);
+    border-radius: 125px;
+    content: "";
+    height: 100%;
+    left: 0%;
+    opacity: .5;
+    position: absolute;
+    top: 0;
+    transition: all .3s;
+    width: 100%;
 }
 
 .help-ir-gamification-button:hover {
   box-shadow: rgba(255, 255, 255, .2) 0 3px 15px inset, rgba(0, 0, 0, .1) 0 3px 5px, rgba(0, 0, 0, .1) 0 10px 13px;
   transform: scale(1.05);
   background-color: #007fff;
+}
+
+.help-ir-gamification-flow-button{
+    position:fixed;
+    right:25px;
+    bottom:25px;
+    z-index:99;
+    border:none;
+    border-radius:50px;
+    padding:15px 25px;
+    background:#0072bd;
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 5px 20px #0003;
 }
 
 @media (min-width: 768px) {
@@ -735,6 +765,14 @@ html .corner-inverse {
     margin-right: 10%;
     width: 80%;
 }
+
+.help-ir-gamification-embed .help-ir-gamification-popup {
+    margin-left: 10%;
+    margin-right: 10%;
+    width: 80%;
+}
+
+
 html .help-ir-gamification-popup , html:lang(fa-IR) .help-ir-gamification-popup {
     border-radius: 6px 6px 0px 0px;
 }	
@@ -765,6 +803,11 @@ html .help-ir-gamification-popup , html:lang(fa-IR) .help-ir-gamification-popup 
     margin-right: 3%;
     width: 94%;
 }
+.help-ir-gamification-embed .help-ir-gamification-popup {
+    margin-left: 3%;
+    margin-right: 3%;
+    width: 94%;
+}
 	/*
 .help-ir-gamification-popup-inner{
     height: 85vh;
@@ -790,6 +833,11 @@ html .help-ir-gamification-popup , html:lang(fa-IR) .help-ir-gamification-popup 
 
 @media only screen and (max-width: 480px) {
 .help-ir-gamification-popup {
+    width: 100%;
+    margin-left: 0%;
+    margin-right: 0%;
+}
+.help-ir-gamification-embed .help-ir-gamification-popup {
     width: 100%;
     margin-left: 0%;
     margin-right: 0%;
