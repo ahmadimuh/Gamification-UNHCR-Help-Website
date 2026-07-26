@@ -1,30 +1,37 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const leftLines = document.querySelectorAll('.speech-left .line');
-  const rightLines = document.querySelectorAll('.speech-right .line');
+//loading fade
+document.addEventListener("DOMContentLoaded", function () {
 
- // If there is no dialog, don't run the code
-  if (!leftLines.length && !rightLines.length) return;
+    const leftBox = document.querySelector(".speech-left");
+    const rightBox = document.querySelector(".speech-right");
 
-// First, keep all dialogs hidden
-gsap.set([leftLines, rightLines], {opacity: 0, y: 20});
+    const leftLines = document.querySelectorAll(".speech-left .line");
+    const rightLines = document.querySelectorAll(".speech-right .line");
 
-// Execute the conversation step
-const tl = gsap.timeline();
+    if (!leftLines.length && !rightLines.length) return;
 
-  tl.to('.speech-left', {opacity: 1, duration: 0.3})
-    .to(leftLines, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      stagger: 1
-    })
-    .to('.speech-right', {opacity: 1, duration: 0.3}, '+=0.5')
-    .to(rightLines, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      stagger: 1
+    leftBox.classList.add("show");
+
+    leftLines.forEach((line, index) => {
+        setTimeout(() => {
+            line.classList.add("show");
+        }, index * 1000);
     });
+
+    const delay = leftLines.length * 1000 + 500;
+
+    setTimeout(() => {
+
+        rightBox.classList.add("show");
+
+        rightLines.forEach((line, index) => {
+            setTimeout(() => {
+                line.classList.add("show");
+            }, index * 1000);
+
+        });
+
+    }, delay);
+
 });
 
 //game_next_btn
